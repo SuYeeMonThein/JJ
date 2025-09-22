@@ -45,10 +45,11 @@ When creating this spec from a user prompt:
 4. **Common underspecified areas**:
    - User types and permissions
    - Data retention/deletion policies  
-   - Performance targets and scale
-   - Error handling behaviors
-   - Integration requirements
-   - Security/compliance needs
+   - Performance targets (<200ms API, <2s page load, checkout flow speed)
+   - Error handling behaviors (especially payment failures)
+   - Integration requirements (payment gateways, shipping APIs)
+   - Security/compliance needs (PCI DSS, data privacy)
+   - Accessibility and usability requirements
 
 ---
 

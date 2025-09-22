@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Product Manager</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/auth.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="container">
+                <h1 class="app-title">
+                    <a href="../index.html">Product Manager</a>
+                </h1>
+            </div>
+        </header>
+
+        <main class="app-main auth-main">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="auth-card">
+                        <h2 class="auth-title">Create Your Account</h2>
+                        <p class="auth-subtitle">Join us and start managing your products today!</p>
+
+                        <form id="signupForm" class="auth-form" novalidate>
+                            <div id="authErrors" class="error-messages" style="display: none;"></div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    class="form-input"
+                                    placeholder="Enter your email"
+                                    required
+                                    autocomplete="email"
+                                >
+                                <div class="field-error" id="emailError"></div>
+                                <div class="field-help">We'll use this to sign you in</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="password-input-container">
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        class="form-input"
+                                        placeholder="Create a strong password"
+                                        required
+                                        minlength="8"
+                                        autocomplete="new-password"
+                                    >
+                                    <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                                        <span class="password-toggle-icon">👁️</span>
+                                    </button>
+                                </div>
+                                <div class="field-error" id="passwordError"></div>
+                                <div class="password-strength" id="passwordStrength">
+                                    <div class="strength-bar">
+                                        <div class="strength-fill" id="strengthFill"></div>
+                                    </div>
+                                    <div class="strength-text" id="strengthText">Password strength</div>
+                                </div>
+                                <div class="field-help">
+                                    Must be at least 8 characters with uppercase, lowercase, number, and special character
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <div class="password-input-container">
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        class="form-input"
+                                        placeholder="Confirm your password"
+                                        required
+                                        minlength="8"
+                                        autocomplete="new-password"
+                                    >
+                                    <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle password visibility">
+                                        <span class="password-toggle-icon">👁️</span>
+                                    </button>
+                                </div>
+                                <div class="field-error" id="confirmPasswordError"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                                    <span class="checkbox-custom"></span>
+                                    I agree to the Terms of Service and Privacy Policy
+                                </label>
+                                <div class="field-error" id="agreeTermsError"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full" id="signupBtn">
+                                Create Account
+                            </button>
+                        </form>
+
+                        <div class="auth-links">
+                            <p>Already have an account? <a href="login.html" class="auth-link">Sign in here</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="container">
+                <p>&copy; 2025 Product Manager. Secure registration with encrypted password storage.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Creating your account...</p>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="../js/utils.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/prototype-auth.js"></script>
+    <script src="../js/prototype-products.js"></script>
+    <script>
+        // Use Prototype services for demo/prototype (like Figma)
+        window.AuthService = window.PrototypeAuthService;
+        window.ProductService = window.PrototypeProductService;
+    </script>
+    <script>
+        // Initialize signup page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if already logged in
+            if (AuthService.isAuthenticated()) {
+                window.location.href = '../pages/dashboard.html';
+                return;
+            }
+
+            // Initialize signup form
+            const signupForm = document.getElementById('signupForm');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const togglePassword = document.getElementById('togglePassword');
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+
+            // Password visibility toggles
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.querySelector('.password-toggle-icon').textContent = type === 'password' ? '👁️' : '🙈';
+            });
+
+            toggleConfirmPassword.addEventListener('click', function() {
+                const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+                confirmPasswordInput.type = type;
+                this.querySelector('.password-toggle-icon').textContent = type === 'password' ? '👁️' : '🙈';
+            });
+
+            // Password strength indicator
+            passwordInput.addEventListener('input', function() {
+                updatePasswordStrength(this.value);
+            });
+
+            // Password confirmation validation
+            confirmPasswordInput.addEventListener('input', function() {
+                if (this.value && this.value !== passwordInput.value) {
+                    showFieldError('confirmPassword', 'Passwords do not match');
+                } else {
+                    clearFieldError('confirmPassword');
+                }
+            });
+
+            // Form submission
+            signupForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const email = formData.get('email').trim();
+                const password = formData.get('password');
+                const confirmPassword = formData.get('confirmPassword');
+                const agreeTerms = formData.get('agreeTerms') === 'on';
+
+                try {
+                    showLoading(true);
+                    clearErrors();
+
+                    // Client-side validation
+                    if (password !== confirmPassword) {
+                        showFieldError('confirmPassword', 'Passwords do not match');
+                        return;
+                    }
+
+                    if (!agreeTerms) {
+                        showFieldError('agreeTerms', 'You must agree to the terms to continue');
+                        return;
+                    }
+
+                    const result = await AuthService.register(email, password);
+                    
+                    if (result.success) {
+                        showToast('Account created successfully! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = '../pages/dashboard.html';
+                        }, 1000);
+                    } else {
+                        showErrors(result.errors);
+                    }
+                } catch (error) {
+                    console.error('Signup error:', error);
+                    showErrors(['An unexpected error occurred. Please try again.']);
+                } finally {
+                    showLoading(false);
+                }
+            });
+
+            function updatePasswordStrength(password) {
+                const strengthFill = document.getElementById('strengthFill');
+                const strengthText = document.getElementById('strengthText');
+                
+                const score = calculatePasswordStrength(password);
+                const percentage = (score / 4) * 100;
+                
+                strengthFill.style.width = `${percentage}%`;
+                
+                if (score === 0) {
+                    strengthFill.className = 'strength-fill';
+                    strengthText.textContent = 'Password strength';
+                } else if (score === 1) {
+                    strengthFill.className = 'strength-fill weak';
+                    strengthText.textContent = 'Weak';
+                } else if (score === 2) {
+                    strengthFill.className = 'strength-fill fair';
+                    strengthText.textContent = 'Fair';
+                } else if (score === 3) {
+                    strengthFill.className = 'strength-fill good';
+                    strengthText.textContent = 'Good';
+                } else {
+                    strengthFill.className = 'strength-fill strong';
+                    strengthText.textContent = 'Strong';
+                }
+            }
+
+            function calculatePasswordStrength(password) {
+                let score = 0;
+                if (password.length >= 8) score++;
+                if (/[a-z]/.test(password)) score++;
+                if (/[A-Z]/.test(password)) score++;
+                if (/[0-9]/.test(password)) score++;
+                if (/[^A-Za-z0-9]/.test(password)) score++;
+                return Math.min(score, 4);
+            }
+
+            function showLoading(show) {
+                const overlay = document.getElementById('loadingOverlay');
+                const btn = document.getElementById('signupBtn');
+                
+                overlay.style.display = show ? 'flex' : 'none';
+                btn.disabled = show;
+                btn.textContent = show ? 'Creating Account...' : 'Create Account';
+            }
+
+            function clearErrors() {
+                document.getElementById('authErrors').style.display = 'none';
+                document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+                document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+            }
+
+            function showErrors(errors) {
+                const errorContainer = document.getElementById('authErrors');
+                errorContainer.innerHTML = errors.map(error => `<p>${error}</p>`).join('');
+                errorContainer.style.display = 'block';
+            }
+
+            function showFieldError(fieldName, message) {
+                const errorEl = document.getElementById(`${fieldName}Error`);
+                const inputEl = document.getElementById(fieldName);
+                if (errorEl && inputEl) {
+                    errorEl.textContent = message;
+                    inputEl.classList.add('error');
+                }
+            }
+
+            function clearFieldError(fieldName) {
+                const errorEl = document.getElementById(`${fieldName}Error`);
+                const inputEl = document.getElementById(fieldName);
+                if (errorEl && inputEl) {
+                    errorEl.textContent = '';
+                    inputEl.classList.remove('error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Product Manager</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/products.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="container">
+                <h1 class="app-title">
+                    <a href="../index.html">Product Manager</a>
+                </h1>
+                <nav class="app-nav">
+                    <div class="nav-user" id="userInfo">
+                        <span id="userEmail"></span>
+                        <button id="logoutBtn" class="btn btn-outline">Logout</button>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <div class="container">
+                <div class="dashboard-header">
+                    <div class="dashboard-title">
+                        <h2>Your Products</h2>
+                        <p id="productCount" class="product-count">Loading...</p>
+                    </div>
+                    <div class="dashboard-actions">
+                        <div class="search-box">
+                            <input
+                                type="text"
+                                id="searchInput"
+                                class="search-input"
+                                placeholder="Search products..."
+                                autocomplete="off"
+                            >
+                            <button type="button" class="search-clear" id="clearSearch" style="display: none;">×</button>
+                        </div>
+                        <select id="sortSelect" class="sort-select">
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="price-asc">Price (Low-High)</option>
+                            <option value="price-desc">Price (High-Low)</option>
+                            <option value="created-desc">Newest First</option>
+                            <option value="created-asc">Oldest First</option>
+                        </select>
+                        <a href="product-form.html" class="btn btn-primary">
+                            <span class="btn-icon">+</span>
+                            Add Product
+                        </a>
+                    </div>
+                </div>
+
+                <div class="products-container">
+                    <div id="productsGrid" class="products-grid">
+                        <!-- Products will be loaded here -->
+                    </div>
+
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <div class="empty-icon">📦</div>
+                        <h3>No products yet</h3>
+                        <p>Start by adding your first product to get organized!</p>
+                        <a href="product-form.html" class="btn btn-primary">Add Your First Product</a>
+                    </div>
+
+                    <div id="noResults" class="empty-state" style="display: none;">
+                        <div class="empty-icon">🔍</div>
+                        <h3>No products found</h3>
+                        <p>Try adjusting your search terms or clearing the search.</p>
+                        <button id="clearSearchBtn" class="btn btn-outline">Clear Search</button>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="pagination" style="display: none;">
+                    <button id="prevPage" class="pagination-btn" disabled>Previous</button>
+                    <div class="pagination-info">
+                        <span id="pageInfo">Page 1 of 1</span>
+                    </div>
+                    <button id="nextPage" class="pagination-btn" disabled>Next</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="container">
+                <p>&copy; 2025 Product Manager. Your data is stored securely in your browser.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Product Card Template -->
+    <template id="productCardTemplate">
+        <div class="product-card" data-product-id="">
+            <div class="product-image">
+                <img src="" alt="" class="product-img">
+                <div class="product-image-placeholder">
+                    <span class="placeholder-icon">📦</span>
+                </div>
+            </div>
+            <div class="product-info">
+                <h3 class="product-name"></h3>
+                <p class="product-description"></p>
+                <div class="product-meta">
+                    <span class="product-price"></span>
+                    <span class="product-category"></span>
+                </div>
+                <div class="product-actions">
+                    <button class="btn btn-outline btn-sm edit-product">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-product">Delete</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Product</h3>
+                <button class="modal-close" id="closeDeleteModal">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete "<span id="deleteProductName"></span>"?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDelete">Cancel</button>
+                <button class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading products...</p>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="../js/utils.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/prototype-auth.js"></script>
+    <script src="../js/prototype-products.js"></script>
+    <script>
+        // Use Prototype services for demo/prototype (like Figma)
+        window.AuthService = window.PrototypeAuthService;
+        window.ProductService = window.PrototypeProductService;
+    </script>
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user info
+            const currentUser = AuthService.getCurrentUser();
+            document.getElementById('userEmail').textContent = currentUser.email;
+
+            // Initialize components
+            let currentPage = 1;
+            const itemsPerPage = 12;
+            let allProducts = [];
+            let filteredProducts = [];
+            let productToDelete = null;
+
+            // Load products
+            await loadProducts();
+
+            // Event listeners
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            document.getElementById('clearSearch').addEventListener('click', clearSearch);
+            document.getElementById('sortSelect').addEventListener('change', handleSort);
+            document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
+            document.getElementById('nextPage').addEventListener('click', () => changePage(1));
+            document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+
+            // Delete modal events
+            document.getElementById('closeDeleteModal').addEventListener('click', closeDeleteModal);
+            document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
+            document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
+
+            async function loadProducts() {
+                try {
+                    showLoading(true);
+                    const result = await ProductService.getAllProducts();
+                    
+                    if (result.success) {
+                        allProducts = result.data;
+                        filteredProducts = [...allProducts];
+                        renderProducts();
+                        updateProductCount();
+                    } else {
+                        showToast('Failed to load products', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error loading products:', error);
+                    showToast('Error loading products', 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+
+            function renderProducts() {
+                const grid = document.getElementById('productsGrid');
+                const emptyState = document.getElementById('emptyState');
+                const noResults = document.getElementById('noResults');
+
+                // Clear grid
+                grid.innerHTML = '';
+
+                // Show appropriate state
+                if (allProducts.length === 0) {
+                    emptyState.style.display = 'block';
+                    noResults.style.display = 'none';
+                    document.getElementById('pagination').style.display = 'none';
+                    return;
+                } else if (filteredProducts.length === 0) {
+                    emptyState.style.display = 'none';
+                    noResults.style.display = 'block';
+                    document.getElementById('pagination').style.display = 'none';
+                    return;
+                } else {
+                    emptyState.style.display = 'none';
+                    noResults.style.display = 'none';
+                }
+
+                // Paginate products
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const productsToShow = filteredProducts.slice(startIndex, endIndex);
+
+                // Render product cards
+                productsToShow.forEach(product => {
+                    const card = createProductCard(product);
+                    grid.appendChild(card);
+                });
+
+                // Update pagination
+                updatePagination();
+            }
+
+            function createProductCard(product) {
+                const template = document.getElementById('productCardTemplate');
+                const card = template.content.cloneNode(true);
+                const cardElement = card.querySelector('.product-card');
+
+                cardElement.dataset.productId = product.id;
+                card.querySelector('.product-name').textContent = product.name;
+                card.querySelector('.product-description').textContent = product.description || 'No description';
+                card.querySelector('.product-price').textContent = `$${product.price.toFixed(2)}`;
+                card.querySelector('.product-category').textContent = product.category || 'Uncategorized';
+
+                // Handle image
+                const img = card.querySelector('.product-img');
+                const placeholder = card.querySelector('.product-image-placeholder');
+                
+                if (product.imageUrl) {
+                    img.src = product.imageUrl;
+                    img.alt = product.name;
+                    img.style.display = 'block';
+                    placeholder.style.display = 'none';
+                } else {
+                    img.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                }
+
+                // Event listeners
+                card.querySelector('.edit-product').addEventListener('click', () => {
+                    window.location.href = `product-form.html?id=${product.id}`;
+                });
+
+                card.querySelector('.delete-product').addEventListener('click', () => {
+                    showDeleteModal(product);
+                });
+
+                return card;
+            }
+
+            function handleSearch(e) {
+                const query = e.target.value.toLowerCase().trim();
+                const clearBtn = document.getElementById('clearSearch');
+
+                clearBtn.style.display = query ? 'block' : 'none';
+
+                if (query) {
+                    filteredProducts = allProducts.filter(product =>
+                        product.name.toLowerCase().includes(query) ||
+                        (product.description && product.description.toLowerCase().includes(query)) ||
+                        (product.category && product.category.toLowerCase().includes(query))
+                    );
+                } else {
+                    filteredProducts = [...allProducts];
+                }
+
+                currentPage = 1;
+                renderProducts();
+            }
+
+            function clearSearch() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('clearSearch').style.display = 'none';
+                filteredProducts = [...allProducts];
+                currentPage = 1;
+                renderProducts();
+            }
+
+            function handleSort(e) {
+                const [field, direction] = e.target.value.split('-');
+                
+                filteredProducts.sort((a, b) => {
+                    let valueA, valueB;
+                    
+                    if (field === 'name') {
+                        valueA = a.name.toLowerCase();
+                        valueB = b.name.toLowerCase();
+                    } else if (field === 'price') {
+                        valueA = a.price;
+                        valueB = b.price;
+                    } else if (field === 'created') {
+                        valueA = new Date(a.createdAt);
+                        valueB = new Date(b.createdAt);
+                    }
+
+                    if (direction === 'asc') {
+                        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                    } else {
+                        return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+                    }
+                });
+
+                renderProducts();
+            }
+
+            function updateProductCount() {
+                const count = allProducts.length;
+                const countEl = document.getElementById('productCount');
+                countEl.textContent = `${count} product${count !== 1 ? 's' : ''}`;
+            }
+
+            function updatePagination() {
+                const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+                const pagination = document.getElementById('pagination');
+                const prevBtn = document.getElementById('prevPage');
+                const nextBtn = document.getElementById('nextPage');
+                const pageInfo = document.getElementById('pageInfo');
+
+                if (totalPages <= 1) {
+                    pagination.style.display = 'none';
+                    return;
+                }
+
+                pagination.style.display = 'flex';
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            }
+
+            function changePage(delta) {
+                const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+                const newPage = currentPage + delta;
+
+                if (newPage >= 1 && newPage <= totalPages) {
+                    currentPage = newPage;
+                    renderProducts();
+                    window.scrollTo(0, 0);
+                }
+            }
+
+            function showDeleteModal(product) {
+                productToDelete = product;
+                document.getElementById('deleteProductName').textContent = product.name;
+                document.getElementById('deleteModal').style.display = 'flex';
+            }
+
+            function closeDeleteModal() {
+                document.getElementById('deleteModal').style.display = 'none';
+                productToDelete = null;
+            }
+
+            async function confirmDelete() {
+                if (!productToDelete) return;
+
+                try {
+                    const result = await ProductService.deleteProduct(productToDelete.id);
+                    
+                    if (result.success) {
+                        showToast('Product deleted successfully', 'success');
+                        await loadProducts(); // Reload products
+                    } else {
+                        showToast('Failed to delete product', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                    showToast('Error deleting product', 'error');
+                }
+
+                closeDeleteModal();
+            }
+
+            function handleLogout() {
+                AuthService.logout();
+                window.location.href = '/src/index.html';
+            }
+
+            function showLoading(show) {
+                document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+            }
+        });
+    </script>
+</body>
+</html>

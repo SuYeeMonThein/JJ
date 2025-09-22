@@ -40,14 +40,18 @@
 **Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
 **Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
 **Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Performance Goals**: [e.g., <200ms API response, <2s page load, 99.9% uptime or NEEDS CLARIFICATION]  
+**Constraints**: [e.g., <2s checkout flow, PCI DSS compliance, accessibility standards or NEEDS CLARIFICATION]  
 **Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **User-Centered Design**: UI/UX design prioritizes intuitive, accessible interfaces
+- [ ] **Fast Checkout Experience**: Checkout flow meets <2s page load, <5s total time targets
+- [ ] **Transparent Policies**: All policies, pricing, and terms are clearly communicated
+- [ ] **Test-First Development**: Critical paths have comprehensive automated tests
+- [ ] **Performance & Reliability**: Design meets 99.9% availability and <200ms API response targets
 
 ## Project Structure
 

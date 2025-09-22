@@ -71,10 +71,12 @@
 
 ## Phase 3.5: Polish
 - [ ] T019 [P] Unit tests for validation in tests/unit/test_validation.py
-- [ ] T020 Performance tests (<200ms)
-- [ ] T021 [P] Update docs/api.md
-- [ ] T022 Remove duplication
-- [ ] T023 Run manual-testing.md
+- [ ] T020 Performance tests (<200ms API, <2s page load)
+- [ ] T021 [P] Usability testing for checkout flow
+- [ ] T022 [P] Accessibility compliance verification (WCAG 2.1)
+- [ ] T023 [P] Update docs/api.md
+- [ ] T024 Remove duplication and code cleanup
+- [ ] T025 Run manual-testing.md
 
 ## Dependencies
 - Tests (T004-T007) before implementation (T008-T014)

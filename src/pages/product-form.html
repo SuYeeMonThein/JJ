@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Add Product - Product Manager</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/products.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="container">
+                <h1 class="app-title">
+                    <a href="../index.html">Product Manager</a>
+                </h1>
+                <nav class="app-nav">
+                    <div class="nav-user" id="userInfo">
+                        <span id="userEmail"></span>
+                        <button id="logoutBtn" class="btn btn-outline">Logout</button>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <div class="container">
+                <div class="form-header">
+                    <div class="form-title">
+                        <h2 id="formTitle">Add New Product</h2>
+                        <p class="form-subtitle">Fill in the details below to create your product</p>
+                    </div>
+                    <div class="form-actions">
+                        <a href="dashboard.html" class="btn btn-outline">
+                            <span class="btn-icon">←</span>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <form id="productForm" class="product-form" novalidate>
+                        <div id="formErrors" class="error-messages" style="display: none;"></div>
+
+                        <div class="form-sections">
+                            <div class="form-section">
+                                <h3 class="section-title">Basic Information</h3>
+                                
+                                <div class="form-group">
+                                    <label for="name" class="form-label">Product Name *</label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        class="form-input"
+                                        placeholder="Enter product name"
+                                        required
+                                        maxlength="100"
+                                    >
+                                    <div class="field-error" id="nameError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea
+                                        id="description"
+                                        name="description"
+                                        class="form-textarea"
+                                        placeholder="Describe your product (optional)"
+                                        rows="4"
+                                        maxlength="500"
+                                    ></textarea>
+                                    <div class="field-help">
+                                        <span id="descriptionCount">0</span>/500 characters
+                                    </div>
+                                    <div class="field-error" id="descriptionError"></div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="price" class="form-label">Price ($) *</label>
+                                        <input
+                                            type="number"
+                                            id="price"
+                                            name="price"
+                                            class="form-input"
+                                            placeholder="0.00"
+                                            min="0"
+                                            step="0.01"
+                                            required
+                                        >
+                                        <div class="field-error" id="priceError"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="category" class="form-label">Category</label>
+                                        <select id="category" name="category" class="form-select">
+                                            <option value="">Select a category</option>
+                                            <option value="Electronics">Electronics</option>
+                                            <option value="Clothing">Clothing</option>
+                                            <option value="Home & Garden">Home & Garden</option>
+                                            <option value="Books">Books</option>
+                                            <option value="Sports">Sports</option>
+                                            <option value="Health & Beauty">Health & Beauty</option>
+                                            <option value="Toys & Games">Toys & Games</option>
+                                            <option value="Food & Beverages">Food & Beverages</option>
+                                            <option value="Automotive">Automotive</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <div class="field-error" id="categoryError"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3 class="section-title">Product Image</h3>
+                                
+                                <div class="form-group">
+                                    <label for="imageUrl" class="form-label">Image URL</label>
+                                    <input
+                                        type="url"
+                                        id="imageUrl"
+                                        name="imageUrl"
+                                        class="form-input"
+                                        placeholder="https://example.com/image.jpg"
+                                    >
+                                    <div class="field-help">
+                                        Enter a URL to an image of your product (optional)
+                                    </div>
+                                    <div class="field-error" id="imageUrlError"></div>
+                                </div>
+
+                                <div class="image-preview" id="imagePreview" style="display: none;">
+                                    <img id="previewImg" src="" alt="Product preview" class="preview-img">
+                                    <button type="button" class="remove-image" id="removeImage">×</button>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3 class="section-title">Additional Details</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="sku" class="form-label">SKU</label>
+                                        <input
+                                            type="text"
+                                            id="sku"
+                                            name="sku"
+                                            class="form-input"
+                                            placeholder="e.g., ABC-123"
+                                            maxlength="50"
+                                        >
+                                        <div class="field-help">Stock Keeping Unit (optional)</div>
+                                        <div class="field-error" id="skuError"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="stock" class="form-label">Stock Quantity</label>
+                                        <input
+                                            type="number"
+                                            id="stock"
+                                            name="stock"
+                                            class="form-input"
+                                            placeholder="0"
+                                            min="0"
+                                            step="1"
+                                        >
+                                        <div class="field-error" id="stockError"></div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="isActive" name="isActive" checked>
+                                        <span class="checkbox-custom"></span>
+                                        Product is active and available
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span id="submitText">Add Product</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="container">
+                <p>&copy; 2025 Product Manager. Your product data is stored securely.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loadingText">Saving product...</p>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="../js/utils.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/products.js"></script>
+    <script>
+        // Initialize product form
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user info
+            const currentUser = AuthService.getCurrentUser();
+            document.getElementById('userEmail').textContent = currentUser.email;
+
+            // Check if editing existing product
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            const isEdit = !!productId;
+
+            let existingProduct = null;
+
+            // Initialize form for edit mode
+            if (isEdit) {
+                await loadProductForEdit(productId);
+            }
+
+            // Initialize form elements
+            const form = document.getElementById('productForm');
+            const descriptionTextarea = document.getElementById('description');
+            const imageUrlInput = document.getElementById('imageUrl');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+
+            // Character counter for description
+            descriptionTextarea.addEventListener('input', function() {
+                const count = this.value.length;
+                document.getElementById('descriptionCount').textContent = count;
+            });
+
+            // Image URL preview
+            imageUrlInput.addEventListener('input', debounce(function() {
+                const url = this.value.trim();
+                if (url) {
+                    showImagePreview(url);
+                } else {
+                    hideImagePreview();
+                }
+            }, 500));
+
+            // Remove image preview
+            document.getElementById('removeImage').addEventListener('click', function() {
+                imageUrlInput.value = '';
+                hideImagePreview();
+            });
+
+            // Form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await handleSubmit();
+            });
+
+            // Cancel button
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to discard your changes?')) {
+                    window.location.href = 'dashboard.html';
+                }
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                AuthService.logout();
+                window.location.href = '../index.html';
+            });
+
+            async function loadProductForEdit(id) {
+                try {
+                    showLoading(true, 'Loading product...');
+                    
+                    const result = await ProductService.getProduct(id);
+                    
+                    if (result.success) {
+                        existingProduct = result.data;
+                        populateForm(existingProduct);
+                        updateUIForEditMode();
+                    } else {
+                        showToast('Product not found', 'error');
+                        window.location.href = 'dashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Error loading product:', error);
+                    showToast('Error loading product', 'error');
+                    window.location.href = 'dashboard.html';
+                } finally {
+                    showLoading(false);
+                }
+            }
+
+            function populateForm(product) {
+                document.getElementById('name').value = product.name || '';
+                document.getElementById('description').value = product.description || '';
+                document.getElementById('price').value = product.price || '';
+                document.getElementById('category').value = product.category || '';
+                document.getElementById('imageUrl').value = product.imageUrl || '';
+                document.getElementById('sku').value = product.sku || '';
+                document.getElementById('stock').value = product.stock || '';
+                document.getElementById('isActive').checked = product.isActive !== false;
+
+                // Update character count
+                const descCount = (product.description || '').length;
+                document.getElementById('descriptionCount').textContent = descCount;
+
+                // Show image preview if available
+                if (product.imageUrl) {
+                    showImagePreview(product.imageUrl);
+                }
+            }
+
+            function updateUIForEditMode() {
+                document.title = 'Edit Product - Product Manager';
+                document.getElementById('pageTitle').textContent = 'Edit Product - Product Manager';
+                document.getElementById('formTitle').textContent = 'Edit Product';
+                document.querySelector('.form-subtitle').textContent = 'Update the details below to modify your product';
+                document.getElementById('submitText').textContent = 'Update Product';
+            }
+
+            async function handleSubmit() {
+                try {
+                    showLoading(true, isEdit ? 'Updating product...' : 'Creating product...');
+                    clearErrors();
+
+                    // Collect form data
+                    const formData = new FormData(form);
+                    const productData = {
+                        name: formData.get('name').trim(),
+                        description: formData.get('description').trim(),
+                        price: parseFloat(formData.get('price')) || 0,
+                        category: formData.get('category').trim(),
+                        imageUrl: formData.get('imageUrl').trim(),
+                        sku: formData.get('sku').trim(),
+                        stock: parseInt(formData.get('stock')) || 0,
+                        isActive: formData.get('isActive') === 'on'
+                    };
+
+                    // Validate required fields
+                    const errors = validateProductData(productData);
+                    if (errors.length > 0) {
+                        showErrors(errors);
+                        return;
+                    }
+
+                    // Submit product
+                    let result;
+                    if (isEdit) {
+                        result = await ProductService.updateProduct(productId, productData);
+                    } else {
+                        result = await ProductService.createProduct(productData);
+                    }
+
+                    if (result.success) {
+                        const message = isEdit ? 'Product updated successfully!' : 'Product created successfully!';
+                        showToast(message, 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                    } else {
+                        showErrors(result.errors || ['Failed to save product']);
+                    }
+                } catch (error) {
+                    console.error('Error saving product:', error);
+                    showErrors(['An unexpected error occurred. Please try again.']);
+                } finally {
+                    showLoading(false);
+                }
+            }
+
+            function validateProductData(data) {
+                const errors = [];
+
+                if (!data.name) {
+                    errors.push('Product name is required');
+                    showFieldError('name', 'Product name is required');
+                }
+
+                if (data.price <= 0) {
+                    errors.push('Price must be greater than 0');
+                    showFieldError('price', 'Price must be greater than 0');
+                }
+
+                if (data.imageUrl && !isValidUrl(data.imageUrl)) {
+                    errors.push('Please enter a valid image URL');
+                    showFieldError('imageUrl', 'Please enter a valid image URL');
+                }
+
+                if (data.stock < 0) {
+                    errors.push('Stock quantity cannot be negative');
+                    showFieldError('stock', 'Stock quantity cannot be negative');
+                }
+
+                return errors;
+            }
+
+            function showImagePreview(url) {
+                previewImg.src = url;
+                previewImg.onload = function() {
+                    imagePreview.style.display = 'block';
+                };
+                previewImg.onerror = function() {
+                    imagePreview.style.display = 'none';
+                    showFieldError('imageUrl', 'Invalid image URL or image failed to load');
+                };
+            }
+
+            function hideImagePreview() {
+                imagePreview.style.display = 'none';
+                clearFieldError('imageUrl');
+            }
+
+            function showLoading(show, text = 'Loading...') {
+                const overlay = document.getElementById('loadingOverlay');
+                const loadingText = document.getElementById('loadingText');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                overlay.style.display = show ? 'flex' : 'none';
+                loadingText.textContent = text;
+                submitBtn.disabled = show;
+            }
+
+            function clearErrors() {
+                document.getElementById('formErrors').style.display = 'none';
+                document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+                document.querySelectorAll('.form-input, .form-textarea, .form-select').forEach(el => {
+                    el.classList.remove('error');
+                });
+            }
+
+            function showErrors(errors) {
+                const errorContainer = document.getElementById('formErrors');
+                errorContainer.innerHTML = errors.map(error => `<p>${error}</p>`).join('');
+                errorContainer.style.display = 'block';
+                window.scrollTo(0, 0);
+            }
+
+            function showFieldError(fieldName, message) {
+                const errorEl = document.getElementById(`${fieldName}Error`);
+                const inputEl = document.getElementById(fieldName);
+                if (errorEl && inputEl) {
+                    errorEl.textContent = message;
+                    inputEl.classList.add('error');
+                }
+            }
+
+            function clearFieldError(fieldName) {
+                const errorEl = document.getElementById(`${fieldName}Error`);
+                const inputEl = document.getElementById(fieldName);
+                if (errorEl && inputEl) {
+                    errorEl.textContent = '';
+                    inputEl.classList.remove('error');
+                }
+            }
+
+            function isValidUrl(string) {
+                try {
+                    new URL(string);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            }
+
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        });
+    </script>
+</body>
+</html>
